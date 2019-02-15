@@ -1,1 +1,2 @@
-aplicacion para jugar sorteos de loteria
+
+Framework basico para api Rest json
