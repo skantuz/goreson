@@ -3,21 +3,22 @@ package app
 import (
 	"context"
 	"fmt"
-	"go-contacts/models"
-	u "lens/utils"
 	"net/http"
 	"os"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/skantuz/goreson/models"
+	u "github.com/skantuz/goreson/utils"
+
+	jwt "github.com/skantuz/jwt-go"
 )
 
 var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		notAuth := []string{"/api/user/new", "/api/user/login"} //List of endpoints that doesn't require auth
-		requestPath := r.URL.Path                               //current request path
+		notAuth := []string{"/api", "/api/users/new", "/api/users/login"} //List of endpoints that doesn't require auth
+		requestPath := r.URL.Path                                         //current request path
 
 		//check if request does not need authentication, serve the request if it doesn't need it
 		for _, value := range notAuth {
