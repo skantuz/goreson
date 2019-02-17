@@ -1,25 +1,22 @@
 package main
 
 import (
-	"appchance/app"
 	"fmt"
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
+	r "github.com/skantuz/goreson/routes"
 )
 
 func main() {
 
-	router := mux.NewRouter()
-	router.Use(app.JwtAuthentication) //attach JWT auth middleware
-
-	port := os.Getenv("PORT") //Get port from .env file, we did not specify any port so this should return an empty string when tested locally
+	router := r.NewRouter()
+	port := os.Getenv("sys_port") //Get port from .env file, we did not specify any port so this should return an empty string when tested locally
 	if port == "" {
 		port = "8000" //localhost
 	}
 
-	fmt.Println(port)
+	fmt.Println("Listen" + port)
 
 	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
 	if err != nil {
