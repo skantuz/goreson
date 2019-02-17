@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"os"
 	"strings"
 
@@ -30,6 +31,8 @@ type User struct {
 	RoleId   uint   `bson:"role_id"`
 	Token    string `bson:"token";sql:"-"`
 }
+
+type Users []User
 
 //Validate incoming user details...
 func (user *User) Validate() (map[string]interface{}, bool) {
@@ -116,7 +119,6 @@ func Login(username, password string) map[string]interface{} {
 }
 
 func GetUser(u uint) *User {
-
 	acc := &User{}
 	GetDB().Table("users").Where("id = ?", u).First(acc)
 	if acc.Email == "" { //User not found!
@@ -127,10 +129,12 @@ func GetUser(u uint) *User {
 	return acc
 }
 
-func ListUsers() []*User {
-
-	acc := make([]*User, 0)
-	err := GetDB().Find(acc)
+func ListUsers() *Users {
+	log.Panicf("2")
+	acc := &Users{}
+	log.Panicf("3")
+	err := GetDB().Table("users").Find(acc)
+	log.Panicf("4")
 	if err != nil { //Users not found!
 		return nil
 	}

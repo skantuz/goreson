@@ -38,8 +38,11 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 
 var GetUsers = func(w http.ResponseWriter, r *http.Request) {
 	data := models.ListUsers()
+	log.Panicf("6")
 	resp := u.Message(true, "success")
+	log.Panicf("7")
 	resp["data"] = data
+	log.Panicf("8")
 	u.Respond(w, resp)
 
 	return

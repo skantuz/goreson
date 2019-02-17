@@ -51,7 +51,7 @@ var routes = Routes{
 	Route{
 		"New User",
 		"GET",
-		"/api/users/id",
+		"/api/users",
 		c.GetUsers,
 	},
 	Route{
