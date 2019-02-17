@@ -30,13 +30,13 @@ func init() {
 	dbUri := ""
 	switch dbType {
 	case "postgres":
-		dbUri := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s", dbHost, dbPort, dbUser, dbName, dbPass) //Build connection string Postgres
+		dbUri = fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s", dbHost, dbPort, dbUser, dbName, dbPass) //Build connection string Postgres
 	case "mysql":
-		dbUri := fmt.Sprintf("%s:%s@%s:%s/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName) //Build connection string Mysql
+		dbUri = fmt.Sprintf("%s:%s@%s:%s/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName) //Build connection string Mysql
 	case "mssql":
-		dbUri := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", dbUser, dbPass, dbHost, dbPort, dbName) //Build connection string Microsoft SQL
+		dbUri = fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s", dbUser, dbPass, dbHost, dbPort, dbName) //Build connection string Microsoft SQL
 	case "sqlite3":
-		dbUri := fmt.Sprintf("%s", dbName) //Build connection string Sqlite3
+		dbUri = fmt.Sprintf("%s", dbName) //Build connection string Sqlite3
 	}
 
 	conn, err := gorm.Open(dbType, dbUri)
@@ -45,7 +45,7 @@ func init() {
 	}
 
 	db = conn
-	db.Debug().AutoMigrate(&User{}) //Database migration
+	db.Debug().AutoMigrate(&User{}, &Role{}) //Database migration
 }
 
 //returns a handle to the DB object

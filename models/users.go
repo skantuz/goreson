@@ -22,106 +22,118 @@ type Token struct {
 //a struct to rep user us
 type User struct {
 	gorm.Model
-	Username string `bson:"username";`
+	Username string `bson:"username"`
 	Password string `bson:"password"`
 	Email    string `bson:"email"`
 	Name     string `bson:"name"`
 	Lastname string `bson:"lastname"`
-
-	Token string `bson:"token";sql:"-"`
+	RoleId   uint   `bson:"role_id"`
+	Token    string `bson:"token";sql:"-"`
 }
 
 //Validate incoming user details...
-func (us *User) Validate() (map[string]interface{}, bool) {
+func (user *User) Validate() (map[string]interface{}, bool) {
 
-	if !strings.Contains(us.Email, "@") {
+	if !strings.Contains(user.Email, "@") {
 		return u.Message(false, "Email address is required"), false
 	}
 
-	if len(us.Password) < 6 {
+	if len(user.Password) < 6 {
 		return u.Message(false, "Password is required"), false
 	}
 
-	//Email must be unique
+	//Email and Username must be unique
 	temp := &User{}
 
 	//check for errors and duplicate emails
-	err := GetDB().Table("accounts").Where("email = ?", us.Email).First(temp).Error
+	err := GetDB().Table("users").Where("username = ?", user.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
 	if temp.Email != "" {
 		return u.Message(false, "Email address already in use by another user."), false
 	}
-
+	if temp.Username != "" {
+		return u.Message(false, "Username already in use by another user."), false
+	}
 	return u.Message(false, "Requirement passed"), true
 }
 
-func (us *User) Create() map[string]interface{} {
+func (user *User) Create() map[string]interface{} {
 
-	if resp, ok := us.Validate(); !ok {
+	if resp, ok := user.Validate(); !ok {
 		return resp
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(us.Password), bcrypt.DefaultCost)
-	us.Password = string(hashedPassword)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user.Password = string(hashedPassword)
 
-	GetDB().Create(us)
+	GetDB().Create(user)
 
-	if us.ID <= 0 {
-		return u.Message(false, "Failed to create us, connection error.")
+	if user.ID <= 0 {
+		return u.Message(false, "Failed to create user, connection error.")
 	}
 
-	//Create new JWT token for the newly registered us
-	tk := &Token{UserId: us.ID}
+	//Create new JWT token for the newly registered user
+	tk := &Token{UserId: user.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	us.Token = tokenString
+	user.Token = tokenString
 
-	us.Password = "" //delete password
-
+	user.Password = "" //delete password
 	response := u.Message(true, "User has been created")
-	response["us"] = us
+	response["user"] = user
 	return response
 }
 
-func Login(email, password string) map[string]interface{} {
+func Login(username, password string) map[string]interface{} {
 
-	us := &User{}
-	err := GetDB().Table("accounts").Where("email = ?", email).First(us).Error
+	user := &User{}
+	err := GetDB().Table("users").Where("username = ?", username).First(user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Email address not found")
+			return u.Message(false, "Username not found")
 		}
 		return u.Message(false, "Connection error. Please retry")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(us.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
 		return u.Message(false, "Invalid login credentials. Please try again")
 	}
 	//Worked! Logged In
-	us.Password = ""
+	user.Password = ""
 
 	//Create JWT token
-	tk := &Token{UserId: us.ID}
+	tk := &Token{UserId: user.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	us.Token = tokenString //Store the token in the response
+	user.Token = tokenString //Store the token in the response
 
 	resp := u.Message(true, "Logged In")
-	resp["us"] = us
+	resp["us"] = user
 	return resp
 }
 
 func GetUser(u uint) *User {
 
 	acc := &User{}
-	GetDB().Table("accounts").Where("id = ?", u).First(acc)
+	GetDB().Table("users").Where("id = ?", u).First(acc)
 	if acc.Email == "" { //User not found!
 		return nil
 	}
 
 	acc.Password = ""
+	return acc
+}
+
+func ListUsers() []*User {
+
+	acc := make([]*User, 0)
+	err := GetDB().Find(acc)
+	if err != nil { //Users not found!
+		return nil
+	}
+
 	return acc
 }

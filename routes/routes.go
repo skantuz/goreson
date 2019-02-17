@@ -21,7 +21,7 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 	for _, route := range routes {
-		router.Name(route.Name).
+		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Handler(route.HandleFunc)
@@ -37,10 +37,22 @@ var routes = Routes{
 		c.Index,
 	},
 	Route{
+		"New Role",
+		"POST",
+		"/api/roles",
+		c.CreateRole,
+	},
+	Route{
 		"New User",
-		"Post",
-		"/api/users/new",
+		"POST",
+		"/api/users",
 		c.CreateUser,
+	},
+	Route{
+		"New User",
+		"GET",
+		"/api/users/id",
+		c.GetUsers,
 	},
 	Route{
 		"Index",
