@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"os"
 	"strings"
 
@@ -114,7 +113,7 @@ func Login(username, password string) map[string]interface{} {
 	user.Token = tokenString //Store the token in the response
 
 	resp := u.Message(true, "Logged In")
-	resp["us"] = user
+	resp["user"] = user
 	return resp
 }
 
@@ -130,14 +129,11 @@ func GetUser(u uint) *User {
 }
 
 func ListUsers() *Users {
-	log.Panicf("2")
-	acc := &Users{}
-	log.Panicf("3")
-	err := GetDB().Table("users").Find(acc)
-	log.Panicf("4")
+	users := &Users{}
+	err := GetDB().Find(users).Error
 	if err != nil { //Users not found!
 		return nil
 	}
 
-	return acc
+	return users
 }

@@ -43,6 +43,12 @@ var routes = Routes{
 		c.CreateRole,
 	},
 	Route{
+		"Get User",
+		"GET",
+		"/api/users/{id}",
+		c.GetUserFor,
+	},
+	Route{
 		"New User",
 		"POST",
 		"/api/users",
@@ -55,9 +61,9 @@ var routes = Routes{
 		c.GetUsers,
 	},
 	Route{
-		"Index",
-		"GET",
+		"Login",
+		"POST",
 		"/api/users/login",
-		c.Index,
+		c.Authenticate,
 	},
 }

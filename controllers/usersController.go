@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/skantuz/goreson/models"
 	u "github.com/skantuz/goreson/utils"
 )
@@ -36,13 +38,26 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	u.Respond(w, resp)
 }
 
+var GetUserFor = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		//The passed path parameter is not an integer
+		u.Respond(w, u.Message(false, "There was an error in your request"))
+		return
+	}
+	data := models.GetUser(uint(id))
+	resp := u.Message(true, "success")
+	resp["data"] = data
+	u.Respond(w, resp)
+
+	return
+}
+
 var GetUsers = func(w http.ResponseWriter, r *http.Request) {
 	data := models.ListUsers()
-	log.Panicf("6")
 	resp := u.Message(true, "success")
-	log.Panicf("7")
 	resp["data"] = data
-	log.Panicf("8")
 	u.Respond(w, resp)
 
 	return
